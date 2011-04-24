@@ -39,27 +39,15 @@
 
 ;; (switch-to-buffer (github-api-request "GET" (concat "repos/show/" github-login) ""))
 
-(defun github-repos-list ()
-  "List all the user's repos"
-  nil)
 
 (defun github-issues-list ()
   "List all the issues for a repository"
   nil)
 
 
-;; This should open a new window. So user can enter title an body.
-;; (defun github-issues-new ()
-;;   "Create a new issue for a github repository"
-;;   (interactive)
-;;   (github-api-request
-;;    "POST"
-;;    (concat "issues/open/"
-;;            (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
-;;    (concat "title="
-;;            (url-hexify-string (read-string "Ticket Title: ")))))
+;; Create new issues
 
-;; Should be based on markdown-mode
+;; TODO: Should be based on markdown-mode
 (define-derived-mode github-issues-new-mode fundamental-mode
   "github-issues-new-mode"
   "Major mode for entering new Github issues."
