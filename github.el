@@ -84,22 +84,20 @@
 (defun github-issues-new-create ()
   "Create the issue on github."
   (interactive)
-  (point-min)
-  (let ((title
-         (buffer-substring-no-properties
-          (line-beginning-position)
-          (line-end-position))))
-    (forward-line 1)
-    (github-api-request
-     "POST"
-     (concat "issues/open/"
-             (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
-     (concat "title=" (url-hexify-string title)
-             "&body=" (url-hexify-string
-                       (buffer-substring-no-properties
-                        (line-beginning-position)
-                        (buffer-end 1)))))
-    (kill-buffer)))
+  (goto-line 1)
+  (github-api-request
+   "POST"
+   (concat "issues/open/"
+           (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
+   (concat "title=" (url-hexify-string
+                     (buffer-substring-no-properties
+                      (point-min)
+                      (line-end-position)))
+           "&body=" (url-hexify-string
+                     (buffer-substring-no-properties
+                      (line-end-position)
+                      (buffer-end 1)))))
+    (kill-buffer))
 
 
 (defun github-issues-new-cancel ()
