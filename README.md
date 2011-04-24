@@ -19,4 +19,4 @@ posting issues.
 
 # Help
 
-    M-x github-issue-new
+ - M-x github-issue-new - Create a new github issue.
