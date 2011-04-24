@@ -24,12 +24,12 @@
 ;; MA 02111-1307, USA.
 
 
-(defconst github-login "")
-(defconst github-token "")
+(defvar github-login "")
+(defvar github-token "")
 
 ;; The repos to autocomplete. Should be of the form username/repo.
 ;; Ex. "abhiyerra/txtdrop" "abhiyerra/vayu"
-(defconst github-autocomplete-repos '())
+(defvar github-autocomplete-repos '())
 
 
 ;; (defun github-repos ()
