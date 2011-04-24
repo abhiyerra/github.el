@@ -31,6 +31,8 @@
 ;; Ex. "abhiyerra/txtdrop" "abhiyerra/vayu"
 (defvar github-autocomplete-repos '())
 
+(defun github-repo-complete ()
+  (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
 
 ;; (defun github-repos ()
 ;;   "Reload all of user's repos"
@@ -39,10 +41,49 @@
 
 ;; (switch-to-buffer (github-api-request "GET" (concat "repos/show/" github-login) ""))
 
+;; Display issues for repo.
+;;  - d - Close issue
+;;  - l - Add label to issue
+;;  - m - Add milestone?
+;;  - c - Comment on issue
+;;  - <RET> - View issue
+(define-derived-mode github-issues-list-mode fundamental-mode
+  "github-issues-list-mode"
+  "Major mode for listing Github issues."
+  (org-set-local
+   'header-line-format
+   "github issues. Finish `C-c C-c'.")
+
+  (define-key github-issues-list-mode-map "\C-c\C-c" 'github-issues-list-close)
+  (define-key github-issues-list-mode-map "\C-c\C-k" 'github-issues-new-close))
 
 (defun github-issues-list ()
   "List all the issues for a repository"
+  (interactive)
+  (save-excursion
+    (let ((repo (github-repo-complete)))
+      (let ((buf (get-buffer-create
+                (concat "*" repo " Issues*"))))
+        (with-current-buffer buf
+          (switch-to-buffer buf)
+          (github-display-issues repo)
+          (setq buffer-read-only t)
+          (github-issues-list-mode))))))
+
+(defun github-display-issues (repo)
+  "Display the results for the repo."
+  ())
+
+
+;; Show an issue
+;; - c - Add a comment
+;; - d - Close issue
+;; - e - Edit the issue
+;; - l - Add label
+(defun github-issues-show ()
+  "Show a particular issue"
   nil)
+
 
 
 ;; Create new issues
@@ -58,7 +99,7 @@
   (define-key github-issues-new-mode-map "\C-c\C-c" 'github-issues-new-create)
   (define-key github-issues-new-mode-map "\C-c\C-k" 'github-issues-new-cancel))
 
-
+;; Display a new buffer to enter ticket.
 (defun github-issues-new ()
   "Open a window to enter a new issue."
   (interactive)
@@ -69,14 +110,14 @@
         (github-issues-new-mode)))))
 
 
+;; The first line is the title, everything else is the body.
 (defun github-issues-new-create ()
   "Create the issue on github."
   (interactive)
   (goto-line 1)
   (github-api-request
    "POST"
-   (concat "issues/open/"
-           (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
+   (concat "issues/open/" (github-repo-complete))
    (concat "title=" (url-hexify-string
                      (buffer-substring-no-properties
                       (point-min)
