@@ -41,9 +41,11 @@
 ;; Ex. "abhiyerra/txtdrop" "abhiyerra/vayu"
 (defvar github-autocomplete-repos '())
 
-
 (defun github-repo-complete ()
-  (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
+  (completing-read "Repository: "
+                   github-autocomplete-repos
+                   nil nil
+                   (concat github-login "/"))) ;; XXX: Defaults to using your login to autcomplete. Might not be true.
 
 ;; (defun github-repos ()
 ;;   "Reload all of user's repos"
