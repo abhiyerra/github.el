@@ -181,18 +181,6 @@
   (interactive)
   (kill-buffer))
 
-;; (defun github-issues-issue ()
-;;   "Show an individual issue from repo's issues."
-;;   nil)
-
-;; (defun github-issues-issue-comment-new ()
-;;   "Add a comment to an issue"
-;;   nil)
-
-;; (defun github-issues-issue-comment-delete ()
-;;   "Add a comment to an issue"
-;;   nil)
-
 
 ;; The main way to make a request to github.
 (defun github-api-request (method url params)
