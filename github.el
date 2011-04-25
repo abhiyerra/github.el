@@ -60,7 +60,7 @@
 ;;  - [ ] l - Add label to issue
 ;;  - [ ] m - Add milestone?
 ;;  - [ ] c - Comment on issue
-;;  - [ ] q - Quit
+;;  - [X] q - Quit
 ;;  - [ ] <RET> - View issue
 (define-derived-mode github-issues-list-mode fundamental-mode
   "github-issues-list-mode"
