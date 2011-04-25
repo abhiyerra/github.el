@@ -24,12 +24,23 @@
 ;; MA 02111-1307, USA.
 
 
-(defvar github-login "")
-(defvar github-token "")
+(defconst github-version "0.1"
+  "Version of github.el")
+
+(defcustom github-login ""
+  "Login for github"
+  :type 'string
+  :group 'github)
+
+(defcustom github-token ""
+  "Token for github. Get it here https://github.com/account/admin"
+  :type 'string
+  :group 'github)
 
 ;; The repos to autocomplete. Should be of the form username/repo.
 ;; Ex. "abhiyerra/txtdrop" "abhiyerra/vayu"
 (defvar github-autocomplete-repos '())
+
 
 (defun github-repo-complete ()
   (completing-read "Repository: " github-autocomplete-repos nil nil (concat github-login "/")))
@@ -54,8 +65,12 @@
    'header-line-format
    "github issues. Finish `C-c C-c'.")
 
-  (define-key github-issues-list-mode-map "\C-c\C-c" 'github-issues-list-close)
-  (define-key github-issues-list-mode-map "\C-c\C-k" 'github-issues-new-close))
+  (define-key github-issues-list-mode-map "\C-c\C-c" 'github-issues-list-close))
+
+(defun github-issues-list-close ()
+  "Close the window."
+  (interactive)
+  (kill-buffer))
 
 (defun github-issues-list ()
   "List all the issues for a repository"
@@ -66,14 +81,62 @@
                 (concat "*" repo " Issues*"))))
         (with-current-buffer buf
           (switch-to-buffer buf)
-          (github-display-issues repo)
-          (setq buffer-read-only t)
-          (github-issues-list-mode))))))
+          (github-issues-list-mode)
+          (let ((issues (github-grab-issues repo)))
+            (switch-to-buffer buf)
+            (mapcar
+             (lambda (x)
+               (github-columnize-and-insert-list
+                (list
+                 (plist-get x :title)
+                 (plist-get x :state))))
+               issues)
+            (setq buffer-read-only t)
+            (buffer-disable-undo)
+            ))))))
 
-(defun github-display-issues (repo)
+;(github-issues-list)
+
+;; user, title, comments, labels created_at
+(defun github-grab-issues (repo)
   "Display the results for the repo."
-  ())
+  (save-excursion
+    (switch-to-buffer (github-api-request "GET" (concat "issues/list/" repo "/open") ""))
+    (goto-char (point-min))
+    (re-search-forward "^\n")
+    (beginning-of-line)
+    (let ((response-string (buffer-substring (point) (buffer-end 1)))
+          (json-object-type 'plist))
+      (let ((issues (plist-get (json-read-from-string response-string) :issues)))
+        (kill-buffer)
+        issues))))
 
+
+
+(defun github-columnize-and-insert-list (list &optional pad-width)
+  "Insert LIST into the current buffer in as many columns as possible.
+The maximum number of columns is determined by the current window
+width and the longest string in LIST."
+  (unless pad-width
+    (setq pad-width 3))
+  (let ((width (window-width))
+        (max (+ (apply #'max (mapcar #'length list))
+                pad-width)))
+    (let ((columns (/ width max)))
+      (when (zerop columns)
+        (setq columns 1))
+      (while list
+        (dotimes (i (1- columns))
+          (insert (concat (car list) (make-string (- max (length (car list)))
+                                                  ?\s)))
+          (setq list (cdr list)))
+        (when (not (null list))
+          (insert (pop list)))
+        (insert "\n")))))
+
+
+
+;; (insert testing-github)
 
 ;; Show an issue
 ;; - c - Add a comment
@@ -114,7 +177,7 @@
 (defun github-issues-new-create ()
   "Create the issue on github."
   (interactive)
-  (goto-line 1)
+  (goto-char (point-min))
   (github-api-request
    "POST"
    (concat "issues/open/" (github-repo-complete))
