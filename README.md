@@ -19,4 +19,5 @@ posting issues.
 
 # Help
 
- - M-x github-issues-new - Create a new github issue.
+ - M-x github-issues-new - Create a new issue for a repository.
+ - M-x github-issues-list - List issues for a repository.
