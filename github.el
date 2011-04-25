@@ -52,25 +52,35 @@
 
 ;; (switch-to-buffer (github-api-request "GET" (concat "repos/show/" github-login) ""))
 
+
 ;; Display issues for repo.
-;;  - d - Close issue
-;;  - l - Add label to issue
-;;  - m - Add milestone?
-;;  - c - Comment on issue
-;;  - <RET> - View issue
+;;  - [X] o - open the issue in the browser
+;;  - [ ] r - Refresh issues
+;;  - [ ] f - Close issue
+;;  - [ ] l - Add label to issue
+;;  - [ ] m - Add milestone?
+;;  - [ ] c - Comment on issue
+;;  - [ ] q - Quit
+;;  - [ ] <RET> - View issue
 (define-derived-mode github-issues-list-mode fundamental-mode
   "github-issues-list-mode"
   "Major mode for listing Github issues."
   (org-set-local
    'header-line-format
-   "github issues. Finish `C-c C-c'.")
+   "github issues. Quit `q'. Open in Browser `o'")
 
-  (define-key github-issues-list-mode-map "\C-c\C-c" 'github-issues-list-close))
+  (define-key github-issues-list-mode-map "q" 'github-issues-list-close)
+  (define-key github-issues-list-mode-map "o" 'github-issues-list-open))
 
 (defun github-issues-list-close ()
   "Close the window."
   (interactive)
   (kill-buffer))
+
+(defun github-issues-list-open ()
+  "Close the window."
+  (interactive)
+  (browse-url (get-text-property (point) 'issue)))
 
 (defun github-issues-list ()
   "List all the issues for a repository"
@@ -86,16 +96,16 @@
             (switch-to-buffer buf)
             (mapcar
              (lambda (x)
-               (github-columnize-and-insert-list
-                (list
-                 (plist-get x :title)
-                 (plist-get x :state))))
-               issues)
+               (let ((cur-line-start (point)))
+                 (insert (plist-get x :title))
+                 (let ((cur-line-end (point)))
+                   (add-text-properties cur-line-start cur-line-end
+                                        `(issue ,(plist-get x :html_url)))
+                   (insert "\n"))))
+             issues)
             (setq buffer-read-only t)
-            (buffer-disable-undo)
-            ))))))
+            (buffer-disable-undo)))))))
 
-;(github-issues-list)
 
 ;; user, title, comments, labels created_at
 (defun github-grab-issues (repo)
@@ -111,32 +121,6 @@
         (kill-buffer)
         issues))))
 
-
-
-(defun github-columnize-and-insert-list (list &optional pad-width)
-  "Insert LIST into the current buffer in as many columns as possible.
-The maximum number of columns is determined by the current window
-width and the longest string in LIST."
-  (unless pad-width
-    (setq pad-width 3))
-  (let ((width (window-width))
-        (max (+ (apply #'max (mapcar #'length list))
-                pad-width)))
-    (let ((columns (/ width max)))
-      (when (zerop columns)
-        (setq columns 1))
-      (while list
-        (dotimes (i (1- columns))
-          (insert (concat (car list) (make-string (- max (length (car list)))
-                                                  ?\s)))
-          (setq list (cdr list)))
-        (when (not (null list))
-          (insert (pop list)))
-        (insert "\n")))))
-
-
-
-;; (insert testing-github)
 
 ;; Show an issue
 ;; - c - Add a comment
