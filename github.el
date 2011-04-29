@@ -166,15 +166,10 @@
   (goto-char (point-min))
   (github-api-request
    "POST"
-   (concat "issues/open/" (github-repo-complete))
-   (concat "title=" (url-hexify-string
-                     (buffer-substring-no-properties
-                      (point-min)
-                      (line-end-position)))
-           "&body=" (url-hexify-string
-                     (buffer-substring-no-properties
-                      (line-end-position)
-                      (buffer-end 1)))))
+   (concat "repos/" (github-repo-complete) "/issues")
+
+   (json-encode `(:title ,(url-hexify-string (buffer-substring-no-properties (point-min) (line-end-position)))
+                  :body ,(url-hexify-string (buffer-substring-no-properties (line-end-position) (buffer-end 1))))))
     (kill-buffer))
 
 
