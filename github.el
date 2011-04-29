@@ -84,29 +84,38 @@
   (interactive)
   (browse-url (get-text-property (point) 'issue)))
 
+
 (defun github-issues-list ()
   "List all the issues for a repository"
   (interactive)
   (save-excursion
     (let ((repo (github-repo-complete)))
-      (let ((buf (get-buffer-create
+      (let ((buf (get-buffer-create ; TODO This can probably be made simpler.
                 (concat "*" repo " Issues*"))))
         (with-current-buffer buf
           (switch-to-buffer buf)
           (github-issues-list-mode)
           (let ((issues (github-grab-issues repo)))
             (switch-to-buffer buf)
-            (mapcar
-             (lambda (x)
-               (let ((cur-line-start (point)))
-                 (insert (plist-get x :title))
-                 (let ((cur-line-end (point)))
-                   (add-text-properties cur-line-start cur-line-end
-                                        `(issue ,(plist-get x :html_url)))
-                   (insert "\n"))))
-             issues)
-            (setq buffer-read-only t)
-            (buffer-disable-undo)))))))
+            (mapcar 'github--insert-issue-row issues))
+          issues)
+        (setq buffer-read-only t)
+        (buffer-disable-undo)))))
+
+(defun github--insert-issue-row (issue)
+  (let ((cur-line-start (point)))
+    (insert
+     (concat
+      (plist-get issue :title)
+      " By "
+      (plist-get (plist-get issue :user) :login)
+      " "
+      (plist-get issue :created_at)))
+    (let ((cur-line-end (point)))
+      (add-text-properties cur-line-start cur-line-end
+                           `(issue ,(plist-get issue :html_url)))
+      (insert "\n"))))
+
 
 
 ;; user, title, comments, labels created_at
