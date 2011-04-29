@@ -9,8 +9,8 @@ posting issues.
     (require 'github)
 
     (setq github-login "abhiyerra")
-    ;; Get the token here: https://github.com/account/admin
-    (setq github-token "EnterGithubTokenHere")
+    ;; Enter your github password.
+    (setq github-password "Password")
     ;; The repos that you want to have autocompleted
     (setq github-autocomplete-repos
           '("abhiyerra/txtdrop"

@@ -32,8 +32,8 @@
   :type 'string
   :group 'github)
 
-(defcustom github-token ""
-  "Token for github. Get it here https://github.com/account/admin"
+(defcustom github-password ""
+  "Password for github."
   :type 'string
   :group 'github)
 
@@ -113,15 +113,15 @@
 (defun github-grab-issues (repo)
   "Display the results for the repo."
   (save-excursion
-    (switch-to-buffer (github-api-request "GET" (concat "issues/list/" repo "/open") ""))
+    (switch-to-buffer (github-api-request "GET" (concat "repos/" repo "/issues") ""))
     (goto-char (point-min))
     (re-search-forward "^\n")
     (beginning-of-line)
     (let ((response-string (buffer-substring (point) (buffer-end 1)))
           (json-object-type 'plist))
-      (let ((issues (plist-get (json-read-from-string response-string) :issues)))
-        (kill-buffer)
-        issues))))
+      (kill-buffer)
+      (json-read-from-string response-string))))
+
 
 
 ;; Show an issue
@@ -188,15 +188,13 @@
 (defun github-api-request (method url params)
   "Make a call to github"
   (let ((url-request-method method)
-        (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-        (url-request-data    (concat
-                              "login=" github-login
-                              "&token=" github-token
-                              "&"
-                              params)))
+        (url-request-extra-headers
+         `(("Content-Type" . "application/x-www-form-urlencoded")
+           ("Authorization" . ,(concat "Basic "
+                                       (base64-encode-string
+                                        (concat github-login ":" github-password))))))
+        (url-request-data params))
     (url-retrieve-synchronously
-     (concat "http://github.com/api/v2/json/" url))))
-
-
+     (concat "https://api.github.com/" url))))
 
 (provide 'github)
