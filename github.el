@@ -1,4 +1,4 @@
-;; github.el --- Way to interact with the Github site through Emacs
+;; github.el --- Interact with Github Issues through Emacs.
 
 ;; Maintainer: Abhi Yerra <abhi@berkeley.edu>
 ;; Author: Abhi Yerra <abhi@berkeley.edu>
