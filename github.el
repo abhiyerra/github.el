@@ -105,12 +105,11 @@
 (defun github--insert-issue-row (issue)
   (let ((cur-line-start (point)))
     (insert
-     (concat
-      (plist-get issue :title)
-      " By "
-      (plist-get (plist-get issue :user) :login)
-      " "
-      (plist-get issue :created_at)))
+     (format "%-15s  %-20s  %-15s  %s"
+              (plist-get (plist-get issue :user) :login)
+              (plist-get issue :created_at)
+              (plist-get issue :title)
+              ""))
     (let ((cur-line-end (point)))
       (add-text-properties cur-line-start cur-line-end
                            `(issue ,(plist-get issue :html_url)))
