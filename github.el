@@ -95,6 +95,14 @@
         (with-current-buffer buf
           (switch-to-buffer buf)
           (github-issues-list-mode)
+          (insert
+           (format "%-5s %-10s %-10s %-20s %-5s  %-20s\n\n"
+                   "ID"
+                   "User"
+                   "Assignee"
+                   "Created At"
+                   "State"
+                   "Title"))
           (let ((issues (github-grab-issues repo)))
             (switch-to-buffer buf)
             (mapcar 'github--insert-issue-row issues))
@@ -105,15 +113,21 @@
 (defun github--insert-issue-row (issue)
   (let ((cur-line-start (point)))
     (insert
-     (format "%-15s  %-20s  %-15s  %s"
+     (format "%-5s %-10s %-10s %-20s %-5s  %-15s"
+              (plist-get issue :number)
               (plist-get (plist-get issue :user) :login)
+              (let ((assignee (plist-get (plist-get issue :assignee) :login)))
+                (if assignee
+                    assignee
+                  ""))
               (plist-get issue :created_at)
-              (plist-get issue :title)
-              ""))
+              (plist-get issue :state)
+              (plist-get issue :title)))
     (let ((cur-line-end (point)))
       (add-text-properties cur-line-start cur-line-end
                            `(issue ,(plist-get issue :html_url)))
       (insert "\n"))))
+
 
 
 
